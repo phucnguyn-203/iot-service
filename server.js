@@ -14,41 +14,220 @@ app.post("/api", async (req, res) => {
                 - "target": the target of the action (e.g., light, or media).
                 - "action": the action to perform (e.g., on, off, or play).
                 - "content": the content to search (return "" if not specified).
+                - "location": the location of the target (e.g., living room, bedroom, toilet, kitchen, all).
                 Instruction: ${instruction}
                 Please respond with only the JSON format.`;
 
         const data = await axios.post("http://localhost:11434/api/generate", {
             model: "phi3",
-            prompt: `<|user|>\n${prompt}<|end|>\n<|assistant|>`,
+            prompt: `<|system|>Your are my Home AI assistant.<|end|><|user|>${prompt}<|end|><|assistant|>`,
             stream: false,
         });
 
-        const result = JSON.parse(
-            data.data.response
-                .trim()
-                .replace(/^\s*```json\s*\n/, "")
-                .replace(/```\s*$/, "")
-        );
+        let result = "";
+
+        if (data.data.response.includes("```json")) {
+            result = JSON.parse(
+                data.data.response
+                    .trim()
+                    .replace(/^\s*```json\s*\n/, "")
+                    .replace(/```\s*$/, "")
+            );
+        } else {
+            result = JSON.parse(
+                data.data.response.trim().replace(/```\s*$/, "")
+            );
+        }
+
+        console.log(result);
 
         if (result.target === "light") {
             if (result.action === "on") {
-                set(ref(database, "light1/turn"), "1")
+                switch (result.location) {
+                    case "living room":
+                        set(ref(database, "light1/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "bedroom":
+                        set(ref(database, "light2/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "toilet":
+                        set(ref(database, "light4/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "wc":
+                        set(ref(database, "light4/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "kitchen":
+                        set(ref(database, "light3/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "all":
+                        set(ref(database, "light1/turn"), "1");
+                        set(ref(database, "light2/turn"), "1");
+                        set(ref(database, "light3/turn"), "1");
+                        set(ref(database, "light4/turn"), "1")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "All lights turned on",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    default:
+                        res.json({
+                            message: "Location not found",
+                        });
+                }
+            } else {
+                switch (result.location) {
+                    case "living room":
+                        set(ref(database, "light1/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "bedroom":
+                        set(ref(database, "light2/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "toilet":
+                        set(ref(database, "light4/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "wc":
+                        set(ref(database, "light4/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "kitchen":
+                        set(ref(database, "light3/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "Light turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    case "all":
+                        set(ref(database, "light1/turn"), "0");
+                        set(ref(database, "light2/turn"), "0");
+                        set(ref(database, "light3/turn"), "0");
+                        set(ref(database, "light4/turn"), "0")
+                            .then(() => {
+                                console.log("Data written successfully!");
+                                res.json({
+                                    message: "All lights turned off",
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error writing data: ", error);
+                            });
+                        break;
+                    default:
+                        res.json({
+                            message: "Location not found",
+                        });
+                }
+            }
+        }
+
+        if (result.target === "door") {
+            if (result.action === "open") {
+                set(ref(database, "door/turn"), "1")
                     .then(() => {
                         console.log("Data written successfully!");
                         res.json({
-                            message: "Light turned on",
+                            message: "Door opened",
                         });
                     })
                     .catch((error) => {
                         console.error("Error writing data: ", error);
                     });
             } else {
-                set(ref(database, "light1/turn"), "0")
+                set(ref(database, "door/turn"), "0")
                     .then(() => {
-                        res.json({
-                            message: "Light turned off",
-                        });
                         console.log("Data written successfully!");
+                        res.json({
+                            message: "Door closed",
+                        });
                     })
                     .catch((error) => {
                         console.error("Error writing data: ", error);
